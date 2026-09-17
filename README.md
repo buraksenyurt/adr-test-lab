@@ -57,6 +57,9 @@ rm src/OrderManagement.Infrastructure/Class1.cs
 
 # ve mimari test paketinin eklenmesi
 dotnet add tests/OrderManagement.ArchitectureTests package TngTech.ArchUnitNET.xUnit
+
+# Infrastructure projesine aşağıdaki Nuget bağımlılığı eklenmeli
+# Microsoft.Extensions.DependencyInjection.Abstractions
 ```
 
 Bundan sonraki kısımları kodlardan takip edebiliriz. Odaklanmamız gereken yer test projesi içeriği ve ADR dokümanları olacak.
