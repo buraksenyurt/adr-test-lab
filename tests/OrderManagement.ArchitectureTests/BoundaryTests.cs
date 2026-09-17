@@ -19,4 +19,16 @@ public sealed class BoundaryTests : ArchitectureTestBase
 
         rule.Check(Architecture);
     }
+
+    [Fact]
+    public void Api_Requests_Should_Reside_In_Contracts_Namespace()
+    {
+        IArchRule rule = Classes().That()
+            .HaveNameContaining("Request")
+            .Should()
+            .ResideInNamespace("OrderManagement.Api.Contracts")
+            .Because("ADR-003 keeps HTTP contracts at the API boundary");
+
+        rule.Check(Architecture);
+    }
 }
