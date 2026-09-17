@@ -69,6 +69,7 @@ Bundan sonraki kısımları kodlardan takip edebiliriz. Odaklanmamız gereken ye
 Projede ele alacağımız ADR dökümanları docs klasörü altında yer alacaktır.
 
 - [ADR 001 Layered Dependency Direction](docs/ADR-001-layered-dependency-direction.md)
+- [ADR 002 Ports and Adapters](docs/ADR-002-ports-and-adapters.md)
 
 ## Testler
 
