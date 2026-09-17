@@ -68,6 +68,8 @@ Bundan sonraki kısımları kodlardan takip edebiliriz. Odaklanmamız gereken ye
 
 Projede ele alacağımız ADR dökümanları docs klasörü altında yer alacaktır.
 
+- [ADR 001 Layered Dependency Direction](docs/ADR-001-layered-dependency-direction.md)
+
 ## Testler
 
 Tüm mimari testler tamamlandığında projeyi normal şekilde test edebiliriz. İster komut satırından ister Visual Studio gibi IDE ortamlarından.
