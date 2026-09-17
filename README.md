@@ -70,6 +70,8 @@ Projede ele alacağımız ADR dökümanları docs klasörü altında yer alacakt
 
 - [ADR 001 Layered Dependency Direction](docs/ADR-001-layered-dependency-direction.md)
 - [ADR 002 Ports and Adapters](docs/ADR-002-ports-and-adapters.md)
+- [ADR 003 Api as Composition Root](docs/ADR-003-api-as-composition-root.md)
+- [ADR 004 Naming and Placement](docs/ADR-004-naming-and-placement.md)
 
 ## Testler
 
