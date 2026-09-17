@@ -24,6 +24,55 @@ Proje referansların yönü aşağıdaki tabloda olduğu gibidir;
 
 Infrastructure, Application üzerinden kullanılan Domain türlerini geçişli referanslarla görebilir. Application katmanının Infrastructure'a referans vermemesi bizim için kritik sınırdır.
 
+## Solution İskeletinin Oluşturulması
+
+Aşağıdaki adımları izleyerek .NET 10 tabanlı solution ve içeriğini oluşturabiliriz.
+
+```bash
+# Solution ve projelerin oluşturulması
+dotnet new sln -n OrderManagement
+dotnet new classlib -n OrderManagement.Domain -o src/OrderManagement.Domain -f net10.0
+dotnet new classlib -n OrderManagement.Application -o src/OrderManagement.Application -f net10.0
+dotnet new classlib -n OrderManagement.Infrastructure -o src/OrderManagement.Infrastructure -f net10.0
+dotnet new web -n OrderManagement.Api -o src/OrderManagement.Api -f net10.0
+dotnet new xunit -n OrderManagement.ArchitectureTests -o tests/OrderManagement.ArchitectureTests -f net10.0
+
+# Projelerin solution'a eklenmesi
+dotnet sln add src/OrderManagement.Domain/OrderManagement.Domain.csproj
+dotnet sln add src/OrderManagement.Application/OrderManagement.Application.csproj
+dotnet sln add src/OrderManagement.Infrastructure/OrderManagement.Infrastructure.csproj
+dotnet sln add src/OrderManagement.Api/OrderManagement.Api.csproj
+dotnet sln add tests/OrderManagement.ArchitectureTests/OrderManagement.ArchitectureTests.csproj
+
+# Projelerin ihtiyaçı olan referans projelerin eklenmesi
+dotnet add src/OrderManagement.Application reference src/OrderManagement.Domain
+dotnet add src/OrderManagement.Infrastructure reference src/OrderManagement.Application
+dotnet add src/OrderManagement.Api reference src/OrderManagement.Application src/OrderManagement.Infrastructure
+dotnet add tests/OrderManagement.ArchitectureTests reference src/OrderManagement.Domain src/OrderManagement.Application src/OrderManagement.Infrastructure src/OrderManagement.Api
+
+# Gereksiz Class1'lerin silinmesi
+rm src/OrderManagement.Domain/Class1.cs
+rm src/OrderManagement.Application/Class1.cs
+rm src/OrderManagement.Infrastructure/Class1.cs 
+
+# ve mimari test paketinin eklenmesi
+dotnet add tests/OrderManagement.ArchitectureTests package TngTech.ArchUnitNET.xUnit
+```
+
+Bundan sonraki kısımları kodlardan takip edebiliriz. Odaklanmamız gereken yer test projesi içeriği ve ADR dokümanları olacak.
+
 ## ADR Dokümanları
 
 Projede ele alacağımız ADR dökümanları docs klasörü altında yer alacaktır.
+
+## Testler
+
+Tüm mimari testler tamamlandığında projeyi normal şekilde test edebiliriz. İster komut satırından ister Visual Studio gibi IDE ortamlarından.
+
+```bash
+dotnet test
+```
+
+## Örnek İhlal Vakaları
+
+//EKLENECEK
