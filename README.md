@@ -223,6 +223,31 @@ public sealed class OrderCreationProcessor(IOrderRepository repository)
 
 ![Test Error 06](./images/TestError_06.png)
 
+### İhlal 7 *(ADR-005 : Framework Bağımsızlığı)*
+
+`Domain` katmanına, framework bağımlılığı getiren bir attribute ekleyelim. Örneğin Orders entity'sinde `System.Text.Json.Serialization` namespace'inden gelen `JsonPropertyName` attribute'u ile bir alanı işaretleyebiliriz.
+
+```csharp
+using System.Text.Json.Serialization;
+
+[JsonPropertyName("customer_email")]
+public string CustomerEmail { get; }
+```
+
+`Domain_Should_Not_Depend_On_Frameworks` testi bu ihlali yakalar:
+
+![Test Error 07](./images/TestError_07.png)
+
+### İhlal 8 *(ADR-005 : Framework Bağımsızlığı)*
+
+ADR-005 uyarında Application katmanı da framework bağımlılıklarından arındırılmalıdır. Örneğin, `HttpClient` veya `DbContext` gibi framework sınıflarına doğrudan bağımlılık verilmemelidir. Bu tür bağımlılıklar, portlar ve adaptörler aracılığıyla Infrastructure katmanına taşınmalıdır. Ancak burada ilginç bir durum da var. Bu kurala göre Application katmanında `Microsoft.EntityFrameworkCore` paketinin kullanılmaması da gerekiyor. ArchUnitTest bunu yakalayamayacaktır ve test yeşil geçer. Zira sadecce paket eklenmesi ve bir üyenin kullanılmaması derlenmiş çıktıda iz bırakmayacağından bir ihlal olarak görülmez. Bu gibi durumlar için `ArchUnitNet` yerine daha geleneksel yollarla da ilerlenebilir. `PackageReferenceTests` isimli birim test sınıfını bir incelemek lazım.
+
+![Test Error 08](./images/TestError_08.png)
+
+Burada aldığımız tedbir tam garanti sağlamayabilir. Örneğin `Application` katmanı EF Core'u referans etmese de, kullandığı başka bir paket EF Core bağımlılığı ile gelebilir ve test yeşil bayral kaldırır. Tam garanti için `obj/project.assets.json` dosyasındaki bağımlılık grafiğini okuyup analiz etmek gerekir ki bu yöntem de **obj** klasörüne bağımlı olduğu için kırılgandır. Böyle durumlarda tam garanti sağlamak zordur. O nedenle bu gibi durumları **ADR** belgesindeki sonuçlar kısmında bilinen bir sınır olarak belirtmek çok daha anlamlıdır. Yani, **ADR belgesinin neyi garanti etmediğini söylemesi de değerlidir!**
+
+> Bir ADR maddesi derleme zamanında veya test zamanında olmak üzere iki kapıyla korunabilir. Derleme zamanından koruma hızlı geri bildirim almayı sağlar. Test koşusu ise belgelenmiş bir kanıt üretir.
+
 ## CI *(Continuous Integration)* Kapısı
 
 Github tarafı için eklenmiş bir workflow dosyamız var. `.github/workflow/ci.yml` dosyası. Aslında içerisinde test koşusunun yapıldığı bir adım da bulunuyor. Bu sayede her push veya pull request işleminde testler otomatik olarak çalıştırılıyor ve sonuçlar GitHub Actions üzerinden takip edilebiliyor. Örneğin bir ADR ihlali söz konusu ise Pull Request açıldığında test koşusunda hata alınacaktır. Aşağıdaki ekran görüntüsünde olduğu gibi.

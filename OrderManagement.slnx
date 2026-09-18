@@ -4,6 +4,7 @@
     <File Path="docs/ADR-002-ports-and-adapters.md" />
     <File Path="docs/ADR-003-api-as-composition-root.md" />
     <File Path="docs/ADR-004-naming-and-placement.md" />
+    <File Path="docs/ADR-005-framework-independence.md" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
