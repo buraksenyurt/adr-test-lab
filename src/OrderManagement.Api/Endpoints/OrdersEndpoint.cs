@@ -4,7 +4,6 @@ using OrderManagement.Api.Contracts;
 
 namespace OrderManagement.Api.Endpoints;
 
-public sealed record UpdateOrderRequest(Guid OrderId, decimal TotalAmount);
 public static class OrdersEndpoint
 {
     
