@@ -8,7 +8,7 @@ Büyük çaplı projelerde *(kurumsal çözümlerde diyebiliriz)* bazı şeyleri
 
 Çözümde çok iddialı bir mimari tasarımı ele almıyoruz. Sadece üzerinde ADR kuralları işleteceğimiz bir solution olması yeterli. Kabaca aşağıdaki bağımlıkların söz konusu olduğunu söyleyebiliriz.
 
-![Layers Overview](Layers.png)
+![Layers Overview](./images/Layers.png)
 
 Api çalıştırılabilir giriş noktası ve composition root rolündedir. Application, use case ile repository portlarını içerir. Infrastructure, portların adaptörlerini sağlar. Domain katmanı malum business içerisindeki taban nesneleri taşır ve en önemlisi dış katmanları bilmez *(Business'ı koruma ilkesi)*
 
@@ -140,7 +140,7 @@ using OrderManagement.Infrastructure.Persistence;
 private static Type ForbiddenPersistenceType => typeof(InMemoryOrderRepository);
 ```
 
-![Test Error 01](TestError_01.png)
+![Test Error 01](./images/TestError_01.png)
 
 > `using` direktifi tek başına derlenmiş assembly içinde bir tip bağımlılığı oluşturmaz. Bu nedenle `Api_Should_Not_Depend_On_Persistence_Adapters` testi namespace bildirimi olsa dahi başarılı kalır. ArchUnitNET assembly'leri incelediği için gerçek bir ihlal oluşturmak üzere namespace içindeki bir tipi de referanslamak gerekir.
 
@@ -155,7 +155,7 @@ async (CreateOrderRequest request,
      CancellationToken cancellationToken) =>
 ```
 
-![Test Error 02](TestError_02.png)
+![Test Error 02](./images/TestError_02.png)
 
 > ADR-001'in üç kuralı *(Domain/Application katmanlarının dış katmanlara bağımlı olamaması)* için ayrı bir ihlal örneğimiz yok. Çünkü proje referans grafiği zaten `Application -> Infrastructure` veya `Infrastructure -> Api` yönünde bir referans eklenmesine izin vermez. Böyle bir referans eklemeye çalışmak dairesel bağımlılık *(circular dependency)* oluşur ve otomatik olarak derleme zamanı hatası alırız. Yani bu kurallar için derleyici zaten ilk savunma hattımızdır. ArchUnitNET testleri ise ikinci bir güvence katmanıdır. Aşağıdaki ihlaller derleyicinin izin verdiği ama ADR'lerin yasakladığı, dolayısıyla yalnızca mimari testlerin yakalayabildiği bazı senaryolara odaklanır.
 
@@ -171,7 +171,7 @@ public sealed record UpdateOrderRequest(Guid OrderId, decimal TotalAmount);
 
 Tip derlenir ve endpoint'te hiç kullanılmasa da adında `Request` geçtiği için `Api_Requests_Should_Reside_In_Contracts_Namespace` testi bunu yakalar:
 
-![Test Error 03](TestError_03.png)
+![Test Error 03](./images/TestError_03.png)
 
 ### İhlal 4 *(ADR-004 : Port Adlandırması)*
 
@@ -186,7 +186,7 @@ public interface IOrderNotifier
 }
 ```
 
-![Test Error 04](TestError_04.png)
+![Test Error 04](./images/TestError_04.png)
 
 ### İhlal 5 *(ADR-004 : Adapter Adlandırması)*
 
@@ -203,7 +203,7 @@ public sealed class OrderCache
 
 Sınıf hiçbir portu implemente etmese, hatta hiç kullanılmasa dahi yalnızca bu namespace'te bulunması `Persistence_Adapters_Should_Have_Repository_In_Their_Name` testini kırar:
 
-![Test Error 05](TestError_05.png)
+![Test Error 05](./images/TestError_05.png)
 
 ### İhlal 6 *(ADR-004 : Handler Adlandırması)*
 
@@ -221,8 +221,10 @@ public sealed class OrderCreationProcessor(IOrderRepository repository)
 
 `Application_Order_Handlers_Should_Have_Handler_In_Their_Name` testi bu kez namespace'e uygun ama isimlendirmesi yanlış olan tipi yakalar:
 
-![Test Error 06](TestError_06.png)
+![Test Error 06](./images/TestError_06.png)
 
 ## CI *(Continuous Integration)* Kapısı
 
-// EKLENECEK
+Github tarafı için eklenmiş bir workflow dosyamız var. `.github/workflow/ci.yml` dosyası. Aslında içerisinde test koşusunun yapıldığı bir adım da bulunuyor. Bu sayede her push veya pull request işleminde testler otomatik olarak çalıştırılıyor ve sonuçlar GitHub Actions üzerinden takip edilebiliyor. Örneğin bir ADR ihlali söz konusu ise Pull Request açıldığında test koşusunda hata alınacaktır. Aşağıdaki ekran görüntüsünde olduğu gibi.
+
+![CI Error](./images/CI_Error.png)
