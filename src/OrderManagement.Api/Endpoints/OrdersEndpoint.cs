@@ -4,8 +4,10 @@ using OrderManagement.Api.Contracts;
 
 namespace OrderManagement.Api.Endpoints;
 
+public sealed record UpdateOrderRequest(Guid OrderId, decimal TotalAmount);
 public static class OrdersEndpoint
 {
+    
     public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost(
