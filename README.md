@@ -129,17 +129,22 @@ dotnet test
 
 Bazı ihlallerde kodun derlenmesinde hiçbir sıkıntı görünmez. Örneğin API katmanı referans ettiği için Infrastructure katmanından bir bileşene *(örneğin concrete repository)* doğrudan erişebilir. Lakin dokümante edilen ADR ve test implementasyonu bunu test koşusunda fark edecektir. Bu çalışmada gösterilmek istenen şey de budur. Yazabildiğimiz kod ama ADR talimatnamesine göre yazılmamalı.
 
-### İhlal 1
+### İhlal 1 *(ADR-001 : Api Layer Forbidden Dependency)*
 
-Api katmanındaki `Endpoints/OrdersEndpoint.cs` dosyasına geçici olarak persistence namespace'ini ekleyelim.
+Api katmanındaki `Endpoints/OrdersEndpoint.cs` dosyasına aşağıdaki namespace'i ekleyelim ve örnek bir nesnesini kullanalım.
 
 ```csharp
 using OrderManagement.Infrastructure.Persistence;
+
+// Field ekleyelim
+private static Type ForbiddenPersistenceType => typeof(InMemoryOrderRepository);
 ```
 
-// SONUÇLAR GELECEK
+![Test Error 01](TestError_01.png)
 
-### İhlal 2
+> `using` direktifi tek başına derlenmiş assembly içinde bir tip bağımlılığı oluşturmaz. Bu nedenle `Api_Should_Not_Depend_On_Persistence_Adapters` testi namespace bildirimi olsa dahi başarılı kalır. ArchUnitNET assembly'leri incelediği için gerçek bir ihlal oluşturmak üzere namespace içindeki bir tipi de referanslamak gerekir.
+
+### İhlal 2 *(ADR-002 : Api Layer Forbidden Dependency)*
 
 Yine Api layer'da Endpoint lambda parametrelerine geçici olarak bir somut adapter tipini *(InMemoryOrderRepository)* ekleyelim.
 
@@ -150,11 +155,73 @@ async (CreateOrderRequest request,
      CancellationToken cancellationToken) =>
 ```
 
-// SONUÇLAR GELECEK
+![Test Error 02](TestError_02.png)
 
-### İhlal 3W
+> ADR-001'in üç kuralı *(Domain/Application katmanlarının dış katmanlara bağımlı olamaması)* için ayrı bir ihlal örneğimiz yok. Çünkü proje referans grafiği zaten `Application -> Infrastructure` veya `Infrastructure -> Api` yönünde bir referans eklenmesine izin vermez. Böyle bir referans eklemeye çalışmak dairesel bağımlılık *(circular dependency)* oluşur ve otomatik olarak derleme zamanı hatası alırız. Yani bu kurallar için derleyici zaten ilk savunma hattımızdır. ArchUnitNET testleri ise ikinci bir güvence katmanıdır. Aşağıdaki ihlaller derleyicinin izin verdiği ama ADR'lerin yasakladığı, dolayısıyla yalnızca mimari testlerin yakalayabildiği bazı senaryolara odaklanır.
 
-// EKLENECEK
+### İhlal 3 *(ADR-003 : Api Composition Root)*
+
+`OrdersEndpoint.cs` dosyasına, `Contracts` namespace'i dışında yeni bir `Request` tipi ekleyelim.
+
+```csharp
+namespace OrderManagement.Api.Endpoints;
+
+public sealed record UpdateOrderRequest(Guid OrderId, decimal TotalAmount);
+```
+
+Tip derlenir ve endpoint'te hiç kullanılmasa da adında `Request` geçtiği için `Api_Requests_Should_Reside_In_Contracts_Namespace` testi bunu yakalar:
+
+![Test Error 03](TestError_03.png)
+
+### İhlal 4 *(ADR-004 : Port Adlandırması)*
+
+`Application.Ports` namespace'ine, adında `Repository` geçmeyen yeni bir arayüz *(interface)* tipi ekleyelim.
+
+```csharp
+namespace OrderManagement.Application.Ports;
+
+public interface IOrderNotifier
+{
+    Task NotifyAsync(Guid orderId, CancellationToken cancellationToken);
+}
+```
+
+![Test Error 04](TestError_04.png)
+
+### İhlal 5 *(ADR-004 : Adapter Adlandırması)*
+
+`Infrastructure.Persistence` namespace'ine, adında `Repository` geçmeyen bir sınıf ekleyelim.
+
+```csharp
+namespace OrderManagement.Infrastructure.Persistence;
+
+public sealed class OrderCache
+{
+    private readonly ConcurrentDictionary<Guid, Order> _cache = new();
+}
+```
+
+Sınıf hiçbir portu implemente etmese, hatta hiç kullanılmasa dahi yalnızca bu namespace'te bulunması `Persistence_Adapters_Should_Have_Repository_In_Their_Name` testini kırar:
+
+![Test Error 05](TestError_05.png)
+
+### İhlal 6 *(ADR-004 : Handler Adlandırması)*
+
+`Application.Orders.Handlers` namespace'ine, adında `Handler` geçmeyen bir sınıf ekleyelim.
+
+```csharp
+namespace OrderManagement.Application.Orders.Handlers;
+
+public sealed class OrderCreationProcessor(IOrderRepository repository)
+{
+    public Task<Order> BuildAsync(CreateOrderCommand command) =>
+        Task.FromResult(Order.Create(command.CustomerEmail, command.TotalAmount));
+}
+```
+
+`Application_Order_Handlers_Should_Have_Handler_In_Their_Name` testi bu kez namespace'e uygun ama isimlendirmesi yanlış olan tipi yakalar:
+
+![Test Error 06](TestError_06.png)
 
 ## CI *(Continuous Integration)* Kapısı
 

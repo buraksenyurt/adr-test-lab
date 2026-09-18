@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/ADR-001-layered-dependency-direction.md" />
+    <File Path="docs/ADR-002-ports-and-adapters.md" />
+    <File Path="docs/ADR-003-api-as-composition-root.md" />
+    <File Path="docs/ADR-004-naming-and-placement.md" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/OrderManagement.Api/OrderManagement.Api.csproj" />
     <Project Path="src/OrderManagement.Application/OrderManagement.Application.csproj" />
